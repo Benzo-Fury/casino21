@@ -1,0 +1,22 @@
+{
+  "name": "casino21",
+  "version": "1.0.0",
+  "description": "A versatile and intuitive Blackjack game engine for JavaScript. Easily integrate and customize blackjack mechanics into your applications or platforms.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": [
+    "blackjack",
+    "21",
+    "casino",
+    "gambling"
+  ],
+  "author": "Neo Haggard",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.5.7"
+  }
+}

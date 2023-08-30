@@ -1,0 +1,5 @@
+/node_modules
+/src
+readme.md
+tsconfig.json
+/.idea
