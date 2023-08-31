@@ -4,20 +4,20 @@ import { HandStatus } from "../enums/HandStatus.js";
 import { HandEvents } from "../types/Events.js";
 export declare class Hand {
     deck: Deck;
-    bet: number;
+    bet?: number | undefined;
     identifier?: string | undefined;
     cards: Array<Card>;
     handValue: number;
     status: HandStatus;
+    private playCount;
     private events;
     /**
      * Initializes a hand and deals it 2 starting cards.
-     * @fires Hand#newHand
      * @param deck The deck from which the cards are drawn.
      * @param bet The initial bet associated with this hand.
      * @param identifier A way to assign a ID or information to this hand.
      */
-    constructor(deck: Deck, bet?: number, identifier?: string | undefined);
+    constructor(deck: Deck, bet?: number | undefined, identifier?: string | undefined);
     /**
      * Draws a card from the Deck and adds it to the hand.
      * @fires Hand#bust/Hand#blackjack/Hand#changed
@@ -38,13 +38,14 @@ export declare class Hand {
      */
     stand(forceValidation?: boolean): void;
     /**
-     * Double downs the hand essentially just multiplying the bet by 2
+     * Double downs the hand essentially just multiplying the bet by 2.
+     * @throws {Error} if no bet amount was provided in the constructor
      */
     doubleDown(): void;
     /**
      * Splits the hand into two hands.
      * @returns {Hand[]} - Returns an array of two new hands.
-     * @throws {Error} - Throws an error if the hand cannot be split.
+     * @throws {Error} - Throws an error if the hand cannot be split. (Use `hand.canSplit()` to avoid)
      */
     split(): Hand[];
     /**
@@ -52,6 +53,21 @@ export declare class Hand {
      * @returns {boolean}
      */
     canSplit(): boolean;
+    /**
+     * Checks if the hand can double down.
+     * @returns {boolean}
+     */
+    canDoubleDown(): boolean;
+    /**
+     * Checks if the hand can hit.
+     * @returns {boolean}
+     */
+    canHit(): boolean;
+    /**
+     * Checks if the hand can stand.
+     * @returns {boolean}
+     */
+    canStand(): boolean;
     /**
      * Registers an event listener callback to a specified event.
      *
@@ -73,6 +89,7 @@ export declare class Hand {
     private addCard;
     /**
      * Validates the current hand, particularly the value of any aces.
+     * @private
      */
     private validate;
     /**

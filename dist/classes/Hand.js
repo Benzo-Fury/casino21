@@ -7,15 +7,15 @@ export class Hand {
     cards = [];
     handValue = 0;
     status = HandStatus.Active;
+    playCount = 0;
     events = new EventEmitter();
     /**
      * Initializes a hand and deals it 2 starting cards.
-     * @fires Hand#newHand
      * @param deck The deck from which the cards are drawn.
      * @param bet The initial bet associated with this hand.
      * @param identifier A way to assign a ID or information to this hand.
      */
-    constructor(deck, bet = 0, identifier) {
+    constructor(deck, bet, identifier) {
         this.deck = deck;
         this.bet = bet;
         this.identifier = identifier;
@@ -26,7 +26,6 @@ export class Hand {
         if (this.cards.some((card) => card.value === "REQUIRES VALIDATION")) {
             this.validate();
         }
-        this.events.emit("newHand", this);
     }
     /**
      * Draws a card from the Deck and adds it to the hand.
@@ -40,6 +39,7 @@ export class Hand {
         }
         this.addCard();
         this.validate();
+        this.playCount += 1;
         if (this.handValue > 21) {
             this.status = HandStatus.Bust;
             this.events.emit("bust");
@@ -74,18 +74,25 @@ export class Hand {
         }
     }
     /**
-     * Double downs the hand essentially just multiplying the bet by 2
+     * Double downs the hand essentially just multiplying the bet by 2.
+     * @throws {Error} if no bet amount was provided in the constructor
      */
     doubleDown() {
+        if (!this.bet) {
+            throw new Error("Double down and split are not available when no bet has been provided");
+        }
         this.bet *= 2;
         this.hit();
     }
     /**
      * Splits the hand into two hands.
      * @returns {Hand[]} - Returns an array of two new hands.
-     * @throws {Error} - Throws an error if the hand cannot be split.
+     * @throws {Error} - Throws an error if the hand cannot be split. (Use `hand.canSplit()` to avoid)
      */
     split() {
+        if (!this.bet) {
+            throw new Error("Double down and split are not available when no bet has been provided");
+        }
         if (!this.canSplit()) {
             throw new Error("Hand cannot be split");
         }
@@ -104,7 +111,37 @@ export class Hand {
      * @returns {boolean}
      */
     canSplit() {
-        return this.cards.length === 2 && this.cards[0].rank === this.cards[1].rank;
+        if (this.cards.length !== 2)
+            return false;
+        const card1Value = this.cards[0].value;
+        const card2Value = this.cards[1].value;
+        // Make sure the values are not "REQUIRES VALIDATION"
+        if (card1Value === "REQUIRES VALIDATION" ||
+            card2Value === "REQUIRES VALIDATION") {
+            this.validate();
+        }
+        return this.cards[0].value === this.cards[1].value;
+    }
+    /**
+     * Checks if the hand can double down.
+     * @returns {boolean}
+     */
+    canDoubleDown() {
+        return this.playCount === 0;
+    }
+    /**
+     * Checks if the hand can hit.
+     * @returns {boolean}
+     */
+    canHit() {
+        return this.status === HandStatus.Active;
+    }
+    /**
+     * Checks if the hand can stand.
+     * @returns {boolean}
+     */
+    canStand() {
+        return this.status === HandStatus.Active;
     }
     /**
      * Registers an event listener callback to a specified event.
@@ -133,6 +170,7 @@ export class Hand {
     }
     /**
      * Validates the current hand, particularly the value of any aces.
+     * @private
      */
     validate() {
         this.handValue = this.calculateHandValue();

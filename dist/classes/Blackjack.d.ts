@@ -8,13 +8,14 @@ export declare class Blackjack {
     private events;
     dealerHand: Hand;
     playerHands: Array<Hand>;
+    constructor();
     /**
      * Creates a new hand and pushes it to the array of hands.
      * @fires Blackjack#newHandCreated
      */
-    createNewHand(bet: number, identifier?: string): void;
+    createNewHand(bet?: number, identifier?: string): void;
     /**
-     * Ends the current game session.
+     * Ends all players turns and starts the dealers turn ending the session!
      *
      * This method:
      * - Throws an error if any player hands have not chosen to stand.
@@ -49,4 +50,12 @@ export declare class Blackjack {
      * });
      */
     on(event: BlackjackEvents, listener: (...args: any[]) => void): void;
+    /**
+     * Removes all event listeners.
+     *
+     * This method is derived from the Node.js EventEmitter class.
+     *
+     * @param event - The name of the event to which the listener is registered.
+     */
+    removeAllListeners(event?: string): void;
 }

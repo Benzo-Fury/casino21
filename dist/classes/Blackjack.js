@@ -10,6 +10,9 @@ export class Blackjack {
     events = new EventEmitter();
     dealerHand = new Hand(this.deck);
     playerHands = [];
+    constructor() {
+        this.events.setMaxListeners(0);
+    }
     /**
      * Creates a new hand and pushes it to the array of hands.
      * @fires Blackjack#newHandCreated
@@ -22,7 +25,7 @@ export class Blackjack {
         this.events.emit("newHandCreated", hand);
     }
     /**
-     * Ends the current game session.
+     * Ends all players turns and starts the dealers turn ending the session!
      *
      * This method:
      * - Throws an error if any player hands have not chosen to stand.
@@ -39,11 +42,13 @@ export class Blackjack {
         while (this.dealerHand.handValue < 17) {
             this.dealerHand.hit();
         }
+        if (this.dealerHand.status === HandStatus.Active) {
+            this.dealerHand.stand();
+        }
         const winningHands = [];
         const losingHands = [];
         const tiedHands = [];
-        /*calculating winners based off of value instead of status as
-                status */
+        //calculating winners based off of value instead of status
         for (const hand of this.playerHands) {
             if (hand.handValue > 21 ||
                 (hand.handValue < this.dealerHand.handValue &&
@@ -97,5 +102,15 @@ export class Blackjack {
      */
     on(event, listener) {
         this.events.on(event, listener);
+    }
+    /**
+     * Removes all event listeners.
+     *
+     * This method is derived from the Node.js EventEmitter class.
+     *
+     * @param event - The name of the event to which the listener is registered.
+     */
+    removeAllListeners(event) {
+        this.events.removeAllListeners(event);
     }
 }
