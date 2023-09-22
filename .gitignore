@@ -1,5 +1,5 @@
-/node_modules
-readme.md
 tsconfig.json
+package-lock.json
 /.idea
 /dist
+/node_modules
