@@ -31,6 +31,11 @@ export class Hand {
     if (this.cards.some((card) => card.value === "REQUIRES VALIDATION")) {
       this.validate();
     }
+
+    if (this.handValue === 21) {
+      this.status = HandStatus.Blackjack;
+      this.events.emit("blackjack");
+    }
   }
 
   /**
