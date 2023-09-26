@@ -11,6 +11,7 @@ export class Hand {
 
   private playCount: number = 0;
   private events: EventEmitter = new EventEmitter();
+  private queuedEvents: Array<{ event: HandEvents; args: any[] }> = [];
 
   /**
    * Initializes a hand and deals it 2 starting cards.
@@ -34,7 +35,7 @@ export class Hand {
 
     if (this.handValue === 21) {
       this.status = HandStatus.Blackjack;
-      this.events.emit("blackjack");
+      this.queueOrEmitEvent("blackjack");
     }
   }
 
@@ -191,6 +192,7 @@ export class Hand {
    */
   public on(event: HandEvents, listener: (...args: any[]) => void): void {
     this.events.on(event, listener);
+    this.emitQueuedEvents();
   }
 
   /**
@@ -234,5 +236,22 @@ export class Hand {
         total + (card.value !== "REQUIRES VALIDATION" ? card.value : 0),
       0
     );
+  }
+
+  private queueOrEmitEvent(event: HandEvents, ...args: any[]): void {
+    if (this.events.listenerCount(event) > 0) {
+      this.events.emit(event, ...args);
+    } else {
+      this.queuedEvents.push({ event, args });
+    }
+  }
+
+  private emitQueuedEvents(): void {
+    this.queuedEvents.forEach(({ event, args }) => {
+      if (this.events.listenerCount(event) > 0) {
+        this.events.emit(event, ...args);
+      }
+    });
+    this.queuedEvents = [];
   }
 }
